@@ -11,3 +11,17 @@
     regexp: "START=no"
     replace: "START=yes"
   when: ansible_os_family == "Debian" and foreman_enable_service
+
+- name: configure ldap certificate
+  copy:
+    content="{{ foreman_ldap_cert }}"
+    dest="{{ foreman_ldap_cert_dir }}/{{ foreman_ldap_cert_file }}"
+    owner=root
+    group=root
+    mode=0644
+  when: foreman_ldap
+  register: foreman_register_ldap
+
+- name: update ca certificates bundle
+  command: "{{ foreman_ca_update_bin }}"
+  when: foreman_ldap and foreman_register_ldap.changed
